@@ -1,6 +1,25 @@
 import { useState, useEffect } from "react";
 import Card from "./Card.jsx";
-export default function Dashboard() {
+
+function shuffleArray(array) {
+  const newArr = [...array];
+
+  for (let i = newArr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+  }
+
+  return newArr;
+}
+
+export default function Dashboard({
+  score,
+  setScore,
+  bestScore,
+  setBestScore,
+  visitedPokemon,
+  setVisitedPokemon,
+}) {
   const pokemonList = [
     "pikachu",
     "charizard",
@@ -15,6 +34,24 @@ export default function Dashboard() {
   ];
 
   const [pokeDex, setPokeDex] = useState([]);
+
+  const handleClick = (pokemon) => {
+    console.log("CLICKED HANDLECLICK");
+    if (!visitedPokemon.some((p) => p.name === pokemon.name)) {
+      console.log("CLICKED Includes ");
+      console.log("visitedPokemon:", visitedPokemon); // 👈 add this
+
+      setScore((score) => score + 1);
+
+      setVisitedPokemon([...visitedPokemon, pokemon]);
+    } else {
+      if (bestScore <= score) {
+        setBestScore(score);
+      }
+      setScore(0);
+      setVisitedPokemon([]);
+    }
+  };
 
   useEffect(() => {
     const fetchPokemon = async () => {
@@ -42,9 +79,20 @@ export default function Dashboard() {
   return (
     <>
       <div className="Dashboard">
-        {pokeDex.map((pokemon,index) => (
-          <Card pokemonName={pokemon.name} pokemonImageURL={pokemon.image} key={index}/>
-        ))}
+        <div className="Dashboard">
+          {pokeDex.length === 0 ? (
+            <p>Loading...</p>
+          ) : (
+            shuffleArray(pokeDex).map((pokemon) => (
+              <Card
+                pokemonName={pokemon.name}
+                pokemonImageURL={pokemon.image}
+                key={pokemon.name}
+                onClick={() => handleClick(pokemon)}
+              />
+            ))
+          )}
+        </div>
       </div>
     </>
   );
